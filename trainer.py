@@ -23,6 +23,7 @@ class Trainer(object):
 
         # Model hyper-parameters
         self.imsize = config.imsize
+        self.imchan = config.imchan
         self.g_num = config.g_num
         self.z_dim = config.z_dim
         self.g_conv_dim = config.g_conv_dim
@@ -101,7 +102,7 @@ class Trainer(object):
             # Compute loss with real images
             # dr1, dr2, df1, df2, gf1, gf2 are attention scores
             real_images = tensor2var(real_images)
-            d_out_real,dr1,dr2 = self.D(real_images)
+            d_out_real, dr1, dr2 = self.D(real_images)
             if self.adv_loss == 'wgan-gp':
                 d_loss_real = - torch.mean(d_out_real)
             elif self.adv_loss == 'hinge':
@@ -109,8 +110,8 @@ class Trainer(object):
 
             # apply Gumbel Softmax
             z = tensor2var(torch.randn(real_images.size(0), self.z_dim))
-            fake_images,gf1,gf2 = self.G(z)
-            d_out_fake,df1,df2 = self.D(fake_images)
+            fake_images, gf1, gf2 = self.G(z)
+            d_out_fake, df1, df2 = self.D(fake_images)
 
             if self.adv_loss == 'wgan-gp':
                 d_loss_fake = d_out_fake.mean()
@@ -190,8 +191,15 @@ class Trainer(object):
 
     def build_model(self):
 
-        self.G = Generator(self.batch_size,self.imsize, self.z_dim, self.g_conv_dim).cuda()
-        self.D = Discriminator(self.batch_size,self.imsize, self.d_conv_dim).cuda()
+        self.G = Generator(batch_size=self.batch_size,
+                            image_size=self.imsize,
+                            z_dim=self.z_dim,
+                            conv_dim=self.g_conv_dim,
+                            image_channels=self.imchan).cuda()
+        self.D = Discriminator(batch_size=self.batch_size,
+                                image_size=self.imsize,
+                                conv_dim=self.d_conv_dim,
+                                image_channels=self.imchan).cuda()
         if self.parallel:
             self.G = nn.DataParallel(self.G)
             self.D = nn.DataParallel(self.D)

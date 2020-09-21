@@ -17,7 +17,7 @@ class Data_Loader():
         if centercrop:
             options.append(transforms.CenterCrop(160))
         if resize:
-            options.append(transforms.Resize((self.imsize,self.imsize)))
+            options.append(transforms.Resize((self.imsize, self.imsize)))
         if totensor:
             options.append(transforms.ToTensor())
         if normalize:
@@ -26,20 +26,23 @@ class Data_Loader():
         return transform
 
     def load_lsun(self, classes='church_outdoor_train'):
-        transforms = self.transform(True, True, True, False)
-        dataset = dsets.LSUN(self.path, classes=[classes], transform=transforms)
+        transform = self.transform(True, True, True, False)
+        dataset = dsets.LSUN(self.path, classes=[classes], transform=transform)
         return dataset
 
     def load_celeb(self):
-        transforms = self.transform(True, True, True, True)
-        dataset = dsets.ImageFolder(self.path+'/CelebA', transform=transforms)
+        transform = self.transform(True, True, True, True)
+        dataset = dsets.ImageFolder(self.path+'/CelebA', transform=transform)
         return dataset
 
     def load_mnist(self):
-        transforms = self.transform(True, True, True, False)
-        dataset = dsets.MNIST(self.path, train=True, transform=transforms)
+        transform = transforms.Compose([
+            transforms.Resize((self.imsize, self.imsize)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5), (0.5))
+        ])
+        dataset = dsets.MNIST(self.path, train=True, transform=transform)
         return dataset
-
 
     def loader(self):
         if self.dataset == 'lsun':

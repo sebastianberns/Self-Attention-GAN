@@ -153,14 +153,14 @@ class Trainer(object):
             # ================== Train G and gumbel ================== #
             # Create random noise
             z = tensor2var(torch.randn(real_images.size(0), self.z_dim))
-            fake_images,_,_ = self.G(z)
+            fake_images, _, _ = self.G(z)
 
             # Compute loss with fake images
-            g_out_fake,_,_ = self.D(fake_images)  # batch x n
+            g_out_fake, _, _ = self.D(fake_images)  # batch x n
             if self.adv_loss == 'wgan-gp':
-                g_loss_fake = - g_out_fake.mean()
+                g_loss_fake = -g_out_fake.mean()
             elif self.adv_loss == 'hinge':
-                g_loss_fake = - g_out_fake.mean()
+                g_loss_fake = -g_out_fake.mean()
 
             self.reset_grad()
             g_loss_fake.backward()
@@ -168,29 +168,30 @@ class Trainer(object):
 
 
             # Print out log info
-            if (step + 1) % self.log_step == 0:
+            if (step+1) % self.log_step == 0:
                 elapsed = time.time() - start_time
                 elapsed = str(datetime.timedelta(seconds=elapsed))
-                print("Elapsed [{}], G_step [{}/{}], D_step[{}/{}], d_out_real: {:.4f}, "
-                      " ave_gamma_l3: {:.4f}, ave_gamma_l4: {:.4f}".
-                      format(elapsed, step + 1, self.total_step, (step + 1),
-                             self.total_step , d_loss_real.data[0],
-                             self.G.attn1.gamma.mean().data[0], self.G.attn2.gamma.mean().data[0] ))
+                if self.G.attn2:
+                    ave_gamma_l4 = "{:.4f}".format(self.G.attn2.gamma.mean().item())
+                else:
+                    ave_gamma_l4 = "n/a"
+                print("Elapsed [{}], Step [{}/{}], d_out_real: {:.4f}, "
+                    " ave_gamma_l3: {:.4f}, ave_gamma_l4: {}".format(
+                        elapsed, step+1, self.total_step,
+                        d_loss_real.item(), self.G.attn1.gamma.mean().item(),
+                        ave_gamma_l4 ))
 
             # Sample images
-            if (step + 1) % self.sample_step == 0:
-                fake_images,_,_= self.G(fixed_z)
+            if (step+1) % self.sample_step == 0:
+                fake_images, _, _ = self.G(fixed_z)
                 save_image(denorm(fake_images.data),
-                           os.path.join(self.sample_path, '{}_fake.png'.format(step + 1)))
+                           os.path.join(self.sample_path, '{}_fake.png'.format(step+1)))
 
             if (step+1) % model_save_step==0:
-                torch.save(self.G.state_dict(),
-                           os.path.join(self.model_save_path, '{}_G.pth'.format(step + 1)))
-                torch.save(self.D.state_dict(),
-                           os.path.join(self.model_save_path, '{}_D.pth'.format(step + 1)))
+                torch.save(self.G.state_dict(), os.path.join(self.model_save_path, '{}_G.pth'.format(step+1)))
+                torch.save(self.D.state_dict(), os.path.join(self.model_save_path, '{}_D.pth'.format(step+1)))
 
     def build_model(self):
-
         self.G = Generator(batch_size=self.batch_size,
                             image_size=self.imsize,
                             z_dim=self.z_dim,

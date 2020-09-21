@@ -86,6 +86,8 @@ class Generator(nn.Module):
             curr_dim = int(curr_dim / 2)
 
             self.attn2 = Self_Attn(curr_dim)
+        else:
+            self.attn2 = None
 
         last.append(nn.ConvTranspose2d(curr_dim, self.imchan, 4, 2, 1))
         last.append(nn.Tanh())
@@ -148,6 +150,8 @@ class Discriminator(nn.Module):
             curr_dim = curr_dim*2
 
             self.attn2 = Self_Attn(curr_dim)
+        else:
+            self.attn2 = None
 
         last.append(nn.Conv2d(curr_dim, 1, 4))
         self.last = nn.Sequential(*last)

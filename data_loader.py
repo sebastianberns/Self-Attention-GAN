@@ -35,12 +35,19 @@ class Data_Loader():
         dataset = dsets.ImageFolder(self.path+'/CelebA', transform=transforms)
         return dataset
 
+    def load_mnist(self):
+        transforms = self.transform(True, True, True, False)
+        dataset = dsets.MNIST(self.path, train=True, transform=transforms)
+        return dataset
+
 
     def loader(self):
         if self.dataset == 'lsun':
             dataset = self.load_lsun()
         elif self.dataset == 'celeb':
             dataset = self.load_celeb()
+        elif self.dataset == 'mnist':
+            dataset = self.load_mnist()
 
         loader = torch.utils.data.DataLoader(dataset=dataset,
                                               batch_size=self.batch,
@@ -48,4 +55,3 @@ class Data_Loader():
                                               num_workers=2,
                                               drop_last=True)
         return loader
-

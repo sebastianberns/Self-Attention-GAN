@@ -1,6 +1,6 @@
 # Self-Attention GAN
 
-Clone of [heykeetae/Self-Attention-GAN](https://github.com/heykeetae/Self-Attention-GAN) adapted for MNIST at 32x32 px size.
+Fork of [heykeetae/Self-Attention-GAN](https://github.com/heykeetae/Self-Attention-GAN) adapted for MNIST at 32x32 px size.
 
 ## Usage
 
